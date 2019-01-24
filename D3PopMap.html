@@ -7,8 +7,8 @@
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
-</head>
-<body>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
 <div id="map" style="width: 700px; height: 600px"></div>
 
 <script type ="text/javascript">
@@ -23,10 +23,33 @@
     var svg = d3.select("#map").select("svg");
     var g = d3.select("#map").select("svg").select('g');
 
-    //address to retrieve json from  http://35.211.124.163/Circles/Towns/20
-    d3.json('http://35.211.124.163/Circles/Towns/20',function(data) {
-        console.log(data);
+    var defaultnum = 20
+    var store
+    $.ajax({
+        async: false,
+        type: "GET",
+        url: 'http://35.211.124.163/Circles/Towns/' + defaultnum, 
+        dataType: "json",
+        success: function(result) {
+            store = result;
+    }});
+    
+    $.each(store, function(d, obj){
+        obj.LatLng = new L.LatLng(obj.lat, obj.lng);
+        console.log(obj) 
     });
+
+    var circles=g.selectAll("circle")
+   .data(store)
+   .enter()
+   .append("circle");
+
+
+    
 </script>
+</head>
+<body>
+
+
 </body>
 </html>
