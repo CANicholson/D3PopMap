@@ -3,83 +3,45 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Population Map</title>
 <script src="https://d3js.org/d3.v5.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+<script src="scripts/D3PopMap.js"></script>
+<title>Population Map</title>
 
-<div id="map" style="width: 700px; height: 600px"></div>
+</head>
+<body>
+
+<form >
+        <input type="integer" id="townnum" placeholder="# of towns">
+        <button type="button" class="btn btn-primary" id="update"  >Update</button>
+</form>
+<div id="map" style="width: 700px; height: 700px"></div>
 
 <script type ="text/javascript">
     var map = new L.Map("map", {scrollWheelZoom: false, zoomControl:false , doubleClickZoom: false }).setView([55, -4], 6);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    var circlelayer = L.svg();
-    circlelayer.addTo(map);
-
+    var circlelayer = L.svg().addTo(map);
     var svg = d3.select("#map").select("svg");
     var g = d3.select("#map").select("svg").select('g');
 
     var defaultnum = 5
-    update(defaultnum);
+    update(defaultnum, g);
 
-    function update(defaultnum){
-        var store
-        d3.json('http://35.211.124.163/Circles/Towns/'+defaultnum).then(function(data) {
-            store = data;
-    
-            $.each(store, function(d, obj){
-                obj.LatLng = new L.LatLng(obj.lat, obj.lng);
-            });
+    document.getElementById("update").onclick = function() {map.removeLayer(circlelayer), update(document.getElementById("townnum").value, refreshlayer(map))};
 
-	        var div = d3.select("body")
-            .append("div")
-            .style("position", "absolute")
-            .style("background", "white")
-            .style("opacity", "0")
-            .style("padding", "0 10px")
-            .style("z-index", "999");
-
-
-            var circles=g.selectAll("circle")
-            .data(store)
-            .enter()
-            .append("circle")
-            .style("stroke", "black")  
-            .style("opacity", .6) 
-            .style("fill", function(d){
-                return "rgb("+ 60000000/d.Population +"," + 10000000/d.Population+",0)"
-            })
-            .attr("r", function(d){
-                return d.Population/6000
-            })
-            .attr("transform",function(d){
-                return "translate("+
-                    map.latLngToLayerPoint(d.LatLng).x +","+
-                    map.latLngToLayerPoint(d.LatLng).y +")";
-            })
-            .attr("pointer-events","visible")
-            .on("mouseover", function(d) {      
-                div.transition()        
-                .style("opacity", .9);      
-                    div .html(d.Town +", "+  d.County +", "+ d.Population)  
-                    .style("left", (d3.event.pageX) + "px")     
-                    .style("top", (d3.event.pageY - 28) + "px");    
-            })            
-            .on("mouseout", function(d) { 
-                div.transition()        
-                .style("opacity", 0);
-            });    
-         });
+    function refreshlayer(map){
+        circlelayer = L.svg().addTo(map);
+        svg = d3.select("#map").select("svg");
+        g = d3.select("#map").select("svg").select('g');
+        return g;
     }
-    
-</script>
-</head>
-<body>
 
+</script>
 
 </body>
 </html>
